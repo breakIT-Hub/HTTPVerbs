@@ -1,0 +1,11 @@
+Parsing Verbs with options:
+* 4xx or 5xx if not enabled
+* list with verbs else
+
+if not enabled:
+* send all verbs and parse the answer
+
+else:
+* print list
+
+
