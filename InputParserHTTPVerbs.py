@@ -3,11 +3,12 @@
 import argparse
 
 
-def __validateInput__(args, parser, argList):
+def __validate_input__(args, parser, argList):
     t = str(args.target[0])
     argList.append(("target", t))
 
     p = int(args.port[0])
+
     if (p < 0 or p > 65535):
         print("Port out of range\n")
         __usage__(parser)
@@ -26,6 +27,7 @@ def __extract_tuple__(values):
 
         if (val[0] == "port"):
             port = val[1]
+
     return (target, port)
 
 
@@ -52,6 +54,6 @@ def parse_input(sysArgv=None):
         args = parser.parse_args()
     else:
         args = parser.parse_args(sysArgv)
-    __validateInput__(args, parser, argList)
+    __validate_input__(args, parser, argList)
 
     return __extract_tuple__(argList)

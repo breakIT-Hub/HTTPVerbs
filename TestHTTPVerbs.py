@@ -4,18 +4,76 @@ import io
 import sys
 import unittest
 from unittest import mock
-
+from unittest.mock import MagicMock
+import argparse
 import pytest
 import requests
 import responses
 
 import HTTPVerbs
 from HTTPVerbs import init_values
+from InputParserHTTPVerbs import __validate_input__ as validate_input
+from InputParserHTTPVerbs import __extract_tuple__ as extract_tuple
+from InputParserHTTPVerbs import parse_input
+from InputParserHTTPVerbs import __usage__ as usage
 
+class DummyArgsParse:
+    target=["0"]
+    port=[0]
 
 class TestHTTPVerbs(unittest.TestCase):
     """Tests for HTTVerbs. """
+    # ############# UNIT TESTS ################
 
+    # ######### InputParserHTTPVerbs.py #######
+    # test validate input with valid port
+    def test_validate_input_valid_port(self):
+        argList = []
+        args = DummyArgsParse()
+        args.target[0] = '1.2.3.4'
+        args.port[0] = 69
+        validate_input(args, None, argList)
+        #with mock.patch.objectvalidate_input(mock_validate_input.args, mock_validate_input.parser, argList)
+        assert argList[0] == ('target', '1.2.3.4')
+        assert argList[1] == ('port', 69)
+
+    # test validate input with invalid port < 0
+    def test_validate_input_invalid_port(self):
+        parser = mock.MagicMock('argparse.ArgumentParser')
+        parser.print_help = mock.MagicMock('argparse.ArgumentParser.print_help', return_value="help me")
+        argList = []
+        args = DummyArgsParse()
+        args.target[0] = '1.2.3.4'
+        args.port[0] = -1
+        with pytest.raises(SystemExit):
+            validate_input(args, parser, argList)
+
+    # test validate input with invalid port > 65535
+    def test_validate_input_invalid_port(self):
+        parser = mock.MagicMock('argparse.ArgumentParser')
+        parser.print_help = mock.MagicMock('argparse.ArgumentParser.print_help', return_value="help me")
+        argList = []
+        args = DummyArgsParse()
+        args.target[0] = '1.2.3.4'
+        args.port[0] = 65536
+        with pytest.raises(SystemExit):
+            validate_input(args, parser, argList)
+
+    # test extract tuple
+    def test_extract_tuple(self):
+        values = [("target", "1.2.3.4"), ("port", 66)]
+        assert extract_tuple(values) == ("1.2.3.4", 66)
+
+    # test usage
+    def test_usage(self):
+        parser = mock.MagicMock('argparse.ArgumentParser')
+        parser.print_help = mock.MagicMock('argparse.ArgumentParser.print_help', return_value="help me")
+        with pytest.raises(SystemExit):
+            usage(parser)
+    ######################################################################################################
+
+
+# ##### INTEGRATION TESTS #####
     # admin inputs target and port with valid values
     def test_input_parser_valid_values(self):
         args = ["-t", "1.2.3.4", "-p", "3456"]
@@ -37,11 +95,6 @@ class TestHTTPVerbs(unittest.TestCase):
         sys.stdout = sys.__stdout__
         assert content in cap.getvalue()
         assert "usage:" in cap.getvalue()
-
-    # admin inputs invalid ip
-    # def test_input_parser_invalid_ip(self):
-    #    args = ["-t", "abc", "-p", "1234"]
-    #    self.get_invalid_output(init_values, args, "ip address")
 
     # admin input invalid port
     def test_input_parser_invalid_port(self):
